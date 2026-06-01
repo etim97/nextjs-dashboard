@@ -5,8 +5,8 @@ import { AuthError } from 'next-auth';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import postgres, { State } from 'postgres';
-import { CreateInvoice } from '../ui/invoices/buttons';
+import postgres from 'postgres';
+
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -121,13 +121,12 @@ export async function deleteInvoice(id: string) {
   try {
     await sql`DELETE FROM invoices WHERE id = ${id}`;
   } catch (error) {
-    // We'll also log the error to the console for now
     console.error(error);
-    return { message: 'Database Error: Failed to Delete Invoice.' };
+    throw new Error('Database Error: Failed to Delete Invoice.');
   }
+
   revalidatePath('/dashboard/invoices');
 }
-
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
